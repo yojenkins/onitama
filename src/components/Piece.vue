@@ -1,7 +1,11 @@
 <template>
   <div
     class="piece"
-    :class="{ red: piece.color === 'red', blue: piece.color === 'blue' }"
+    :class="{
+      red: piece.color === 'red',
+      blue: piece.color === 'blue',
+      selected: piece.selected,
+    }"
   >
     P
   </div>
@@ -9,12 +13,20 @@
 
 <script lang="ts">
 import Vue, { PropType } from "vue";
+export interface PieceInfo {
+  position: {
+    row: number;
+    col: number;
+  };
+  color: "red" | "blue";
+  selected: boolean;
+}
 
 export default Vue.extend({
   name: "Piece",
   props: {
     piece: {
-      type: Object as PropType<{ row: number; col: number; color: string }>,
+      type: Object as PropType<PieceInfo>,
     },
   },
 });
@@ -27,6 +39,10 @@ export default Vue.extend({
   }
   &.blue {
     color: blue;
+  }
+  &.selected {
+    border-radius: 50%;
+    border: 2px solid black;
   }
 }
 </style>

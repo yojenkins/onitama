@@ -5,6 +5,7 @@
       v-for="n in 25"
       :key="n"
       :class="{ home: n === 3 || n === 23 }"
+      @click="selectSquare(n)"
     >
       <Piece v-if="getPieceIndex(n)" :piece="getPieceIndex(n)" />
     </div>
@@ -13,36 +14,115 @@
 
 <script lang="ts">
 import Vue from "vue";
-import Piece from "./Piece.vue";
+import Piece, { PieceInfo } from "./Piece.vue";
+enum PlayerColor {
+  blue = "blue",
+  red = "red",
+}
 
 export default Vue.extend({
   components: { Piece },
   data: function () {
     return {
+      selectedPiece: null,
       pieces: [
-        { row: 0, col: 0, color: "red" },
-        { row: 0, col: 1, color: "red" },
-        { row: 0, col: 2, color: "red", master: true },
-        { row: 0, col: 3, color: "red" },
-        { row: 0, col: 4, color: "red" },
-        { row: 4, col: 0, color: "blue" },
-        { row: 4, col: 1, color: "blue" },
-        { row: 4, col: 2, color: "blue", master: true },
-        { row: 4, col: 3, color: "blue" },
-        { row: 4, col: 4, color: "blue" },
+        {
+          position: { row: 0, col: 0 },
+          color: PlayerColor.red,
+          selected: false,
+        },
+        {
+          position: { row: 0, col: 1 },
+          color: PlayerColor.red,
+          selected: false,
+        },
+        {
+          position: { row: 0, col: 2 },
+          color: PlayerColor.red,
+          selected: false,
+          master: true,
+        },
+        {
+          position: { row: 0, col: 3 },
+          color: PlayerColor.red,
+          selected: false,
+        },
+        {
+          position: { row: 0, col: 4 },
+          color: PlayerColor.red,
+          selected: false,
+        },
+        {
+          position: { row: 4, col: 0 },
+          color: PlayerColor.blue,
+          selected: false,
+        },
+        {
+          position: { row: 4, col: 1 },
+          color: PlayerColor.blue,
+          selected: false,
+        },
+        {
+          position: { row: 4, col: 2 },
+          color: PlayerColor.blue,
+          selected: false,
+          master: true,
+        },
+        {
+          position: { row: 4, col: 3 },
+          color: PlayerColor.blue,
+          selected: false,
+        },
+        {
+          position: { row: 4, col: 4 },
+          color: PlayerColor.blue,
+          selected: false,
+        },
       ],
     };
   },
   methods: {
-    getPieceIndex(n: number) {
-      let match = null;
+    selectSquare(n: number) {
+      const piece = this.getPieceIndex(n);
+      if (piece) {
+        if (this.selectedPiece) {
+          const prevSelection = this.getPieceIndex(this.selectedPiece);
+          if (prevSelection) prevSelection.selected = false;
+        }
+        this.selectedPiece = n;
+        piece.selected = true;
+        return;
+      }
+
+      if (this.selectedPiece) {
+        if (this.isValidMove()) {
+          this.getPieceIndex(this.selectedPiece).position =
+            this.indexToRowColPosition(n);
+          this.selectedPiece = n;
+        }
+      }
+    },
+
+    isValidMove() {
+      return true;
+    },
+
+    indexToRowColPosition(n: number) {
       const row = Math.floor((n % 5 === 0 ? n - 1 : n) / 5);
       let col = n % 5;
       col === 0 ? (col = 4) : (col = col - 1);
 
+      return { row, col };
+    },
+
+    getPieceIndex(n: number): PieceInfo | null {
+      let match = null;
+      const { row, col } = this.indexToRowColPosition(n);
+
       for (let i = 0; i < this.pieces.length; i++) {
         const piece = this.pieces[i];
-        if (piece.row === row && piece.col === col) {
+        const { position } = piece;
+        if (position.row === row && position.col === col) {
           match = piece;
           break;
         }
